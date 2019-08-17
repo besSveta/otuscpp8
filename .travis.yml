@@ -3,7 +3,7 @@ language: cpp
 compiler: clang
 before_script:
 - sudo apt update
-- sudo apt install libboost-test-dev libspdlog-dev -y
+- sudo apt install libboost-all-dev libspdlog-dev -y
 script:
 - cmake .
 - cmake --build .
