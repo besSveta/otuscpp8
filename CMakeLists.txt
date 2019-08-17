@@ -8,8 +8,7 @@ find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(Boost REQUIRED COMPONENTS regex)
 find_package(Boost REQUIRED COMPONENTS system)
-set(Boost_INCLUDE_DIR  /usr/include/boost)
-set(BOOST_ROOT /usr/lib/x86_64-linux-gnu)
+set(Boost_NO_BOOST_CMAKE ON)
 
 include_directories(${Boost_INCLUDE_DIR}) 
 
