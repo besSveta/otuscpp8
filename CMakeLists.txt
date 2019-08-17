@@ -23,7 +23,9 @@ set_target_properties(bayan lib bayan_test PROPERTIES
 set_target_properties(bayan_test PROPERTIES
     COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK
 )
-
+set_target_properties(bayan PROPERTIES
+    COMPILE_DEFINITIONS BOOST_ALL_DYN_LINK
+)
 target_link_libraries(bayan 
 	${Boost_LIBRARIES}
 	lib
