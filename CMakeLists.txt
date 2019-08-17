@@ -9,7 +9,7 @@ find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(Boost REQUIRED COMPONENTS regex)
 find_package(Boost REQUIRED COMPONENTS system)
 set(Boost_INCLUDE_DIR  /usr/include/boost)
-set(Boost_LIBRARY_DIR /usr/lib/x86_64-linux-gnu)
+set(BOOST_ROOT /usr/lib/x86_64-linux-gnu)
 
 include_directories(${Boost_INCLUDE_DIR}) 
 
