@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_SUITE(async_test_suite)
 
 BOOST_AUTO_TEST_CASE(async__some_test_case)
 {
-	auto finder = GetDuplicatesFinder(1, "--scanDir C:\\test");
+	auto finder = DuplicateFinderCreator::GetDuplicatesFinder(1, "--scanDir C:\\test");
 	  BOOST_REQUIRE_EQUAL(finde.scanDirs.size(), 1);
 
 }
