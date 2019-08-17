@@ -9,6 +9,8 @@ find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(Boost REQUIRED COMPONENTS regex)
 find_package(Boost REQUIRED COMPONENTS system)
 
+include_directories(${Boost_INCLUDE_DIR}) 
+
 add_executable(bayan bayan.cpp)
 add_library(lib bayan_lib.cpp)
 add_executable(bayan_test bayan_test.cpp)
