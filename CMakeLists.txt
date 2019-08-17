@@ -2,15 +2,11 @@ cmake_minimum_required(VERSION 3.2)
 
 project(nickname VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
 find_package(Threads REQUIRED)
-set(Boost_INCLUDE_DIR  /usr/include/boost)
-set(Boost_LIBRARY_DIR /usr/lib/x86_64-linux-gnu)
-find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(Boost REQUIRED COMPONENTS regex)
 find_package(Boost REQUIRED COMPONENTS system)
-set(Boost_NO_BOOST_CMAKE ON)
 
 include_directories(${Boost_INCLUDE_DIR}) 
 
