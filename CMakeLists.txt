@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.5)
 
 project(nickname VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
 find_package(Threads REQUIRED)
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
-find_package(Boost COMPONENTS filesystem REQUIRED)
-find_package(Boost COMPONENTS program_options REQUIRED)
-find_package(Boost 1.65 COMPONENTS regex REQUIRED)
-find_package(Boost COMPONENTS system REQUIRED)
+find_package(Boost 1.65 COMPONENTS unit_test_framework REQUIRED)
+find_package(Boost REQUIRED 1.65 COMPONENTS filesystem)
+find_package(Boost 1.65 COMPONENTS program_options)
+find_package(Boost REQUIRED 1.65 COMPONENTS regex)
+find_package(Boost REQUIRED COMPONENTS system)
 
 include_directories(${Boost_INCLUDE_DIR}) 
 
