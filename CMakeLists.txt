@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2)
 
 project(nickname VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
 find_package(Threads REQUIRED)
-find_package(Boost 1.70.0 REQUIRED)
+find_package(Boost REQUIRED)
 
 add_executable(bayan bayan.cpp)
 add_library(lib bayan_lib.cpp)

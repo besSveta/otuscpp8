@@ -14,7 +14,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/classification.hpp>
-#include <boost/uuid/detail/md5.hpp>
+#include <boost/uuid/sha1.hpp>
 #include <boost/algorithm/hex.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -109,11 +109,11 @@ class DuplicatesFinder {
 			}
 			// находим хеш значение для блока
 			unsigned int hashValue;
-			if (hashType == "md5") {
-				boost::uuids::detail::md5 md5Hash;
-				boost::uuids::detail::md5::digest_type digest;
-				md5Hash.process_bytes(&bufer[0], sizeToRead);
-				md5Hash.get_digest(digest);
+			if (hashType == "sha1") {
+				boost::uuids::detail::sha1 sha1;
+				sha1.process_bytes(&bufer[0], sizeToRead);
+				unsigned digest[5] = {0};
+				sha1.get_digest(digest);
 				hashValue = 0;
 				for (auto t : digest) {
 					hashValue += t;
@@ -271,7 +271,7 @@ class DuplicatesFinder {
 					// учитывается глубина просмотра файлов.
 
 					currentPath = dirIter->path();
-					if (std::find(skipDirs.begin(), skipDirs.end(), currentPath) != skipDirs.end()) {
+					if (dirIter.depth() > scanLevel || std::find(skipDirs.begin(), skipDirs.end(), currentPath) != skipDirs.end()) {
 						dirIter.no_push();
 						dirIter++;
 						continue;
@@ -291,7 +291,7 @@ class DuplicatesFinder {
 					}
 
 					// если первый файл, не смотрим дальше
-					if (dirIter.depth() > scanLevel || !is_regular_file(currentPath) || matchMask == false) {
+					if (!is_regular_file(currentPath) || matchMask == false) {
 						dirIter++;
 						continue;
 					}

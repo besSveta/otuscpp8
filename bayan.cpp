@@ -12,7 +12,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/classification.hpp>
-//#include <boost/uuid/detail/md5.hpp>
+#include <boost/uuid/sha1.hpp>
 #include <boost/algorithm/hex.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -108,17 +108,18 @@ class DuplicatesFinder {
 			}
 			// находим хеш значение для блока
 			unsigned int hashValue;
-		/*	if (hashType == "md5") {
-				boost::uuids::detail::md5 md5Hash;
-				boost::uuids::detail::md5::digest_type digest;
+			if (hashType == "sha1") {
+				boost::uuids::detail::sha1 sha1;
 				md5Hash.process_bytes(&bufer[0], sizeToRead);
+				unsigned hash[5] = {0};
+    				sha1.get_digest(hash);
 				md5Hash.get_digest(digest);
 				hashValue = 0;
 				for (auto t : digest) {
 					hashValue += t;
 				}
 			}
-			else*/
+			else
 			{
 				boost::crc_32_type crc32Hash;
 				crc32Hash.process_bytes(&bufer[0], sizeToRead);
