@@ -8,7 +8,7 @@
 
 #define BOOST_TEST_MODULE ip_filter_test_module
 #include <boost/test/included/unit_test.hpp>
-#include "bayan_lib.h"
+//#include "bayan_lib.h"
 
 BOOST_AUTO_TEST_SUITE(async_test_suite)
 
@@ -18,8 +18,8 @@ char*  params[3];
 	params[0] = const_cast<char *>("");
 	params[1] = const_cast<char *>("--scanDirs");
 	params[2] = { const_cast<char *>("test")};	
-	DuplicatesFinder finder = DuplicateFinderCreator::GetDuplicatesFinder(3,params);
-BOOST_REQUIRE_EQUAL(finder.scanDirs[0], "C:\\test");
+	//DuplicatesFinder finder = DuplicateFinderCreator::GetDuplicatesFinder(3,params);
+BOOST_REQUIRE_EQUAL(params[2], "test");
 
 }
 
