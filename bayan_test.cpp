@@ -14,10 +14,11 @@ BOOST_AUTO_TEST_SUITE(async_test_suite)
 
 BOOST_AUTO_TEST_CASE(async__some_test_case)
 {
-char *params[1];
-params[0]="--scanDir C:\\test";
-	DuplicatesFinder finder = DuplicateFinderCreator::GetDuplicatesFinder(1, params);
-	  BOOST_REQUIRE_EQUAL(finder.scanDirs.size(), 1);
+char*  params[3];
+	params[0] = const_cast<char *>("");
+	params[1] = const_cast<char *>("--scanDirs");
+	params[2] = { const_cast<char *>("test")};	
+	DuplicatesFinder finder = DuplicateFinderCreator::GetDuplicatesFinder(3,params);
 BOOST_REQUIRE_EQUAL(finder.scanDirs[0], "C:\\test");
 
 }
