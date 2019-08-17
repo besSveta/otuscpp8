@@ -5,7 +5,7 @@ find_package(Threads REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 find_package(Boost COMPONENTS filesystem REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
-find_package(Boost COMPONENTS regex REQUIRED)
+find_package(Boost 1.65 COMPONENTS regex REQUIRED)
 find_package(Boost COMPONENTS system REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIR}) 
