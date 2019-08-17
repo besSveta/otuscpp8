@@ -3,8 +3,7 @@ language: cpp
 compiler: clang
 before_script:
 - sudo apt update
-- sudo add-apt-repository ppa:mhier/libboost-latest
-- sudo apt update
+- sudo apt-get install libboost1.65-dev
 script:
 - cmake .
 - cmake --build .
