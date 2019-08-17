@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.5)
 
 project(nickname VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
 find_package(Threads REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
-find_package(Boost REQUIRED COMPONENTS filesystem)
-find_package(Boost REQUIRED COMPONENTS program_options)
-find_package(Boost REQUIRED COMPONENTS regex)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost COMPONENTS filesystem REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS regex REQUIRED)
+find_package(Boost COMPONENTS system REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIR}) 
 
@@ -22,11 +22,6 @@ set_target_properties(bayan lib bayan_test PROPERTIES
 
 set_target_properties(bayan_test PROPERTIES
     COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK
-    INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR}
-)
-
-set_target_properties(bayan PROPERTIES
-    INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR}
 )
 
 target_link_libraries(bayan 
