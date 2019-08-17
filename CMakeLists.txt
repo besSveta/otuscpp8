@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(bayan VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
 find_package(Threads REQUIRED)
-set(Boost_INCLUDE_DIR  /usr/include/boost)
+set(Boost_INCLUDE_DIR  /usr/include)
 set(Boost_LIBRARY_DIR /usr/lib/x86_64-linux-gnu)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem)
