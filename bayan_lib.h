@@ -272,7 +272,7 @@ class DuplicatesFinder {
 					// учитывается глубина просмотра файлов.
 
 					currentPath = dirIter->path();
-					if (dirIter.depth() > scanLevel || std::find(skipDirs.begin(), skipDirs.end(), currentPath) != skipDirs.end()) {
+					if (dirIter.level() > scanLevel || std::find(skipDirs.begin(), skipDirs.end(), currentPath) != skipDirs.end()) {
 						dirIter.no_push();
 						dirIter++;
 						continue;
