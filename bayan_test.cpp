@@ -17,9 +17,9 @@ BOOST_AUTO_TEST_CASE(async__some_test_case)
 char*  params[3];
 	params[0] = const_cast<char *>("");
 	params[1] = const_cast<char *>("--scanDirs");
-	params[2] = { const_cast<char *>("test")};	
+	params[2] = const_cast<char *>("test");	
 	DuplicatesFinder finder = DuplicateFinderCreator::GetDuplicatesFinder(3,params);
-BOOST_REQUIRE_EQUAL(finder.scanDirs, "test");
+BOOST_REQUIRE_EQUAL(finder.scanDirs[0], "test");
 
 }
 
