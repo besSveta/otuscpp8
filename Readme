@@ -9,5 +9,5 @@ fileMasks - std::string маски имен файлов разрешенных 
 hashType - std::string -один из имеющихся алгоритмов хэширования (crc32, sha1), по умолчанию crc32.
 blockSize - int - размер блока, которым производится чтения файлов. 
 
---scanDir D:\tests\Duplicates --scanLevel 2 --blockSize 1024000  --fileMasks dump|.h
+--scanDirs D:\tests\Duplicates --scanLevel 2 --blockSize 1024000  --fileMasks dump|.h
 
