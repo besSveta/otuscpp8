@@ -8,7 +8,7 @@
 
 #define BOOST_TEST_MODULE ip_filter_test_module
 #include <boost/test/included/unit_test.hpp>
-//#include "bayan_lib.h"
+#include "bayan_lib.h"
 
 BOOST_AUTO_TEST_SUITE(async_test_suite)
 
