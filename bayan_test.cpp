@@ -18,7 +18,7 @@ char*  params[3];
 	params[0] = const_cast<char *>("");
 	params[1] = const_cast<char *>("--scanDirs");
 	params[2] = const_cast<char *>("test");	
-	DuplicatesFinder finder = std::get<1>(DuplicateFinderCreator::GetDuplicatesFinder(3,params));
+	DuplicatesFinder finder = std::get<0>(DuplicateFinderCreator::GetDuplicatesFinder(3,params));
 BOOST_REQUIRE_EQUAL(finder.scanDirs[0], "test");
 
 }
