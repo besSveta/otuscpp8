@@ -1,4 +1,3 @@
-
 #pragma once
 #include <iostream>
 #include <memory>
@@ -7,6 +6,9 @@
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
+#include <clocale>
+#include <tuple>
+#include <utility>
 #include  <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/functional/hash.hpp>
@@ -15,7 +17,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/classification.hpp>
-#include <boost/uuid/sha1.hpp>
 #include <boost/algorithm/hex.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -31,10 +32,6 @@
 #include <boost/program_options/value_semantic.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/version.hpp>
-
-
-
-
 
 namespace bfs = boost::filesystem;
 namespace po = boost::program_options;
@@ -90,15 +87,13 @@ class DuplicatesFinder {
 	std::unordered_map<size_t, std::unordered_set<size_t>> duplicates;
 	size_t maxBlockLength;
 
-	boost::hash<std::string> string_hash;	
+	boost::hash<std::string> string_hash;
 	std::vector<std::string> skipDirs;
 	int scanLevel;
 	int minFileSize;
 	std::string fileMasks;
 	std::string hashType;
 	int blockSize;
-
-
 
 	// читает блок из файла.  возвращает указатель на BlockPart
 	std::unique_ptr<BlockPart> readBlock(FileInfo & fileInfo) {
@@ -126,22 +121,17 @@ class DuplicatesFinder {
 				}
 			}
 			// находим хеш значение для блока
-			unsigned int hashValue;
-			if (hashType == "sha1") {
-				boost::uuids::detail::sha1 sha1;
-				sha1.process_bytes(&bufer[0], sizeToRead);
-				unsigned digest[5] = {0};
-				sha1.get_digest(digest);
-				hashValue = 0;
-				for (auto t : digest) {
-					hashValue += t;
-				}
-			}
-			else
-			{
+			std::size_t hashValue;
+			if (hashType == "crc32") {
 				boost::crc_32_type crc32Hash;
 				crc32Hash.process_bytes(&bufer[0], sizeToRead);
 				hashValue = crc32Hash.checksum();
+			}
+			else
+			{
+				for (auto i = 0; i < sizeToRead; i++) {
+					boost::hash_combine(hashValue, bufer[0]);
+				}
 			}
 
 
@@ -154,7 +144,7 @@ class DuplicatesFinder {
 	void FillDuplicates(std::vector<size_t> equalFiles, BlockPart currentBlock,
 		size_t filePathHash, FileInfo fileInfo) {
 		std::unique_ptr<BlockPart> anotherBlock = nullptr;
-		for (auto fl : equalFiles) {
+		for (const auto &fl : equalFiles) {
 			auto it = savedFiles.find(fl);
 			if (it == savedFiles.end())
 				continue;
@@ -197,8 +187,8 @@ class DuplicatesFinder {
 					//  сравниваем есть ли файлы, для которых до этого уже были совпадения,
 					// формируем новый список совпавших.
 					tempFiles.clear();
-					for (auto fl1 : equalFiles) {
-						for (auto fl2 : block->second) {
+					for (const auto& fl1 : equalFiles) {
+						for (const auto& fl2 : block->second) {
 							if (fl1 == fl2) {
 								tempFiles.push_back(fl2);
 							}
@@ -211,7 +201,6 @@ class DuplicatesFinder {
 				if (block->second.size() > maxBlockLength) {
 					maxBlockLength = block->second.size();
 				}
-
 			}
 			else {
 				// блок не найден и он первый, сохранить блок и выйти
@@ -224,7 +213,7 @@ class DuplicatesFinder {
 				if (equalFiles.size() != 0) {
 					tempFiles.clear();
 					blocks[*currentBlock].push_back(filePathHash);
-					for (auto fl : equalFiles) {
+					for (const auto& fl : equalFiles) {
 						auto it = savedFiles.find(fl);
 						if (it == savedFiles.end())
 							continue;
@@ -254,30 +243,17 @@ class DuplicatesFinder {
 		}
 	}
 
-	// сравнить файлы.
-	void compareFiles(std::string dirName) {
-		bfs::path dirPath(dirName);
-		// сравнить файлы.
-	}
-
 	// просмотреть файлы конкретной папки
-	void ProcessDirectory(std::string dirName) {
+	void ProcessDirectory(const std::string &dirName) {
 		bfs::path dirPath(dirName);
 		try {
 			maxBlockLength = 0;
 			if (bfs::is_directory(dirPath)) {
-
-				int size;
-				bfs::path currentPath;
-				std::unique_ptr<BlockPart> firtstBlock = nullptr;
-				size_t pathHash;
 				blocksMap tempMap;
 				boost::regex filter;
 				if (fileMasks.size() > 0) {
 					filter = boost::regex(fileMasks);
 				}
-
-
 				auto dirIter = bfs::recursive_directory_iterator(dirPath);
 				bfs::recursive_directory_iterator endIter;
 				std::string currentPathstr;
@@ -287,14 +263,14 @@ class DuplicatesFinder {
 				while (dirIter != endIter)
 				{
 					// учитывается глубина просмотра файлов.
-
-					currentPath = dirIter->path();
-					if (dirIter.level() > scanLevel || std::find(skipDirs.begin(), skipDirs.end(), currentPath) != skipDirs.end()) {
+					bfs::path currentPath = dirIter->path();
+					if (dirIter.level() > scanLevel ||
+						(bfs::is_directory(currentPath) &&
+						std::find(skipDirs.begin(), skipDirs.end(), currentPath) != skipDirs.end())) {
 						dirIter.no_push();
 						dirIter++;
 						continue;
 					}
-
 					currentPathstr = currentPath.string();
 					// соответствие маске
 					matchMask = true;
@@ -307,13 +283,12 @@ class DuplicatesFinder {
 							matchMask = false;
 						}
 					}
-
 					// если первый файл, не смотрим дальше
 					if (!is_regular_file(currentPath) || matchMask == false) {
 						dirIter++;
 						continue;
 					}
-					size = bfs::file_size(currentPath);
+					auto size = bfs::file_size(currentPath);
 					if (size <= minFileSize)
 					{
 						dirIter++;
@@ -321,7 +296,7 @@ class DuplicatesFinder {
 					}
 
 					//  сохраняем информацию о файле.
-					pathHash = string_hash(currentPathstr);
+					auto pathHash = string_hash(currentPathstr);
 					auto savedFileIter = savedFiles.emplace(pathHash,
 						FileInfo(currentPathstr, size)).first;
 
@@ -337,7 +312,7 @@ class DuplicatesFinder {
 							//читаем блок.
 							if (file.second.size == size
 								&& file.first != pathHash) {
-								firtstBlock = readBlock(file.second);
+								auto firtstBlock = readBlock(file.second);
 								if (firtstBlock != nullptr)
 									tempMap[*firtstBlock].push_back(file.first);
 							}
@@ -347,7 +322,6 @@ class DuplicatesFinder {
 								tempMap);
 							blocksBySizes[size] = tempMap;
 						}
-
 					}
 					else {
 						// читаю блоки из текущего файла и сравниваю с просмотренными файлами кандидатами в дубликаты.
@@ -368,11 +342,11 @@ class DuplicatesFinder {
 
 	friend class DuplicateFinderCreator;
 public:
-std::vector<std::string> scanDirs;
+	std::vector<std::string> scanDirs;
 	std::vector<std::vector<std::string>> GetDuplicates() {
 
 		if (savedFiles.size() == 0) {
-			for (auto dir : scanDirs) {
+			for (const auto & dir : scanDirs) {
 				ProcessDirectory(dir);
 			}
 
@@ -383,8 +357,8 @@ std::vector<std::string> scanDirs;
 		}
 
 		int i = 0;
-		for (auto fileHash : duplicates) {
-			for (auto file : fileHash.second) {
+		for (const auto & fileHash : duplicates) {
+			for (const auto & file : fileHash.second) {
 
 				auto savedFileIter = savedFiles.find(file);
 				if (savedFileIter != savedFiles.end()) {
@@ -400,11 +374,11 @@ std::vector<std::string> scanDirs;
 	void printDuplicates() {
 		auto res = GetDuplicates();
 		if (res.size() == 0) {
-			std::cout << "No files to print";
+			std::cout << "No files to print"<<std::endl;
 		}
 
-		for (auto dupl : res) {
-			for (auto file : dupl) {
+		for (const auto &dupl : res) {
+			for (const auto & file : dupl) {
 				std::cout << file << "\n";
 			}
 			std::cout << std::endl;
@@ -415,9 +389,11 @@ std::vector<std::string> scanDirs;
 
 class DuplicateFinderCreator {
 public:
-	static DuplicatesFinder GetDuplicatesFinder(int argsCount, char *av[]) {
+	static std::tuple<DuplicatesFinder, bool> GetDuplicatesFinder(int argsCount, char *av[]) {
+
 		po::options_description desc("Duplicate file options");
 		desc.add_options()
+			("help", "help on this program.")
 			("scanDirs", po::value<std::vector<std::string>>(), "Directory to scan")
 			("skipDirs", po::value<std::vector<std::string>>(), "Directory to avoid")
 			("scanLevel", po::value<int>(), "Level to scan children directories")
@@ -426,54 +402,72 @@ public:
 			("hashType", po::value<std::string>(), "Hash type")
 			("blockSize", po::value<int>(), "Block size to read from file");
 		DuplicatesFinder finder;
-		po::variables_map vm;
-		po::store(po::parse_command_line(argsCount, av, desc), vm);
-		po::notify(vm);
-		if (vm.count("scanDirs")) {
-			finder.scanDirs = vm["scanDirs"].as <std::vector<std::string>>();
-		}
-		else {
-			throw("No scan directory set");
-		}
+		try {
 
-		if (vm.count("skipDirs")) {
-			finder.skipDirs = vm["skipDirs"].as <std::vector<std::string>>();
-		}
+			po::variables_map vm;
+			po::store(po::parse_command_line(argsCount, av, desc), vm);
+			po::notify(vm);
+			if (vm.count("help")) {
+				bfs::path fPath("Readme");
 
-		if (vm.count("scanLevel")) {
-			finder.scanLevel = vm["scanLevel"].as <int>();
-		}
-		else {
-			finder.scanLevel = 0;
-		}
+				if (bfs::exists(fPath)) {
+					bfs::ifstream f(fPath);
+					if (f.is_open()) {
+						std::setlocale(LC_CTYPE, "rus"); // вызов функции настройки локали
+						std::cout << f.rdbuf();
+					}
+				}
+				return std::make_tuple(finder, false);
+			}
+			if (vm.count("scanDirs")) {
+				finder.scanDirs = vm["scanDirs"].as <std::vector<std::string>>();
+			}
+			else {
+				throw("No scan directory set");
+			}
 
-		if (vm.count("minFileSize")) {
-			finder.minFileSize = vm["minFileSize"].as <int>();
-		}
-		else {
-			finder.minFileSize = 1;
-		}
+			if (vm.count("skipDirs")) {
+				finder.skipDirs = vm["skipDirs"].as <std::vector<std::string>>();
+			}
 
-		if (vm.count("fileMasks")) {
-			//boost::split(finder.fileMasks, vm["fileMasks"].as <std::string>(), boost::is_any_of("|"));
-			auto str = vm["fileMasks"].as <std::string>();
-			boost::replace_all(str, ".", "\\.");
-			finder.fileMasks = std::string("(" + str + ")+");
-		}
+			if (vm.count("scanLevel")) {
+				finder.scanLevel = vm["scanLevel"].as <int>();
+			}
+			else {
+				finder.scanLevel = 0;
+			}
 
-		if (vm.count("hashType")) {
-			finder.hashType = vm["hashType"].as <std::string>();
-		}
+			if (vm.count("minFileSize")) {
+				finder.minFileSize = vm["minFileSize"].as <int>();
+			}
+			else {
+				finder.minFileSize = 1;
+			}
 
-		if (vm.count("blockSize")) {
-			finder.blockSize = vm["blockSize"].as <int>();
-		}
-		else {
-			finder.blockSize = 5;
-		}
+			if (vm.count("fileMasks")) {
+				//boost::split(finder.fileMasks, vm["fileMasks"].as <std::string>(), boost::is_any_of("|"));
+				auto str = vm["fileMasks"].as <std::string>();
+				boost::replace_all(str, ".", "\\.");
+				finder.fileMasks = std::string("(" + str + ")+");
+			}
 
+			if (vm.count("hashType")) {
+				finder.hashType = vm["hashType"].as <std::string>();
+			}
 
-		return finder;
+			if (vm.count("blockSize")) {
+				finder.blockSize = vm["blockSize"].as <int>();
+			}
+			else {
+				finder.blockSize = 5;
+			}
+			return std::make_tuple(finder, true);
+		}
+		catch (const po::error &ex) {
+			std::cout << ex.what() << '\n';
+			std::cout << "use -help" << std::endl;
+			return std::make_tuple(finder, false);
+		}
 	}
 
 };
